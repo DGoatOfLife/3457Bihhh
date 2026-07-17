@@ -34,11 +34,11 @@
  */
 #define PROS_USE_LITERALS
 
-#include "api.h"
-
 #include "autons.hpp"
 
 #include "Lift.hpp"
+
+#include "util.hpp"
 
 using namespace pros;
 
@@ -50,8 +50,6 @@ using namespace pros;
 extern MotorGroup left_motors;
 extern MotorGroup right_motors;
 extern Imu imu;
-extern Controller controller;
-extern Chassis chassis;
 
 extern Lift lift;
 
