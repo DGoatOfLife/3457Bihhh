@@ -45,15 +45,18 @@ ControllerSettings lateral_controller(
 );
 
 // kP 2 kD 10
+// kP 3 kD 13 slight oscillation
+// kP 4 kD 25
+// kP 5 kD 37
 ControllerSettings angular_controller(
-	3,		// kP
+	5,		// kP
 	0,		// kI
-	13,		// kD
-	0,		// anti windup
-	0,		// small error range (in)
-	0,	// small error range timeout (ms)
-	0,		// large error range (in)
-	0,	// large error range timeout (ms)
+	37,		// kD
+	3,		// anti windup
+	1,		// small error range (in)
+	100,	// small error range timeout (ms)
+	3,		// large error range (in)
+	500,	// large error range timeout (ms)
 	0		// max accel (slew)
 );
 
@@ -107,6 +110,11 @@ void initialize() {
 			pros::delay(100);
 		}
 	});
+
+	Task screenTask(
+		tuning_cli_screen_task,
+		&chassis
+	);
 }
 
 /**
@@ -157,40 +165,55 @@ void autonomous() {
  */
 void opcontrol() {
 	while (true) {
-		// Adjust lift targets.
-		if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_A)) {
-			Lift::setLiftTarget(Lift::A);
-		} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_B)) {
-			Lift::setLiftTarget(Lift::B);
-		} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) {
-			Lift::setLiftTarget(Lift::C);
-		} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) {
-			Lift::setLiftTarget(Lift::D);
-		} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) {
-			Lift::setLiftTarget(Lift::E);
-		} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) {
-			Lift::setLiftTarget(Lift::F);
-		}
+		if (!TuningCLI::tuningPID) {
+			// Re-enable PID tuner.
+			bool LEFT_pressed = controller.get_digital(E_CONTROLLER_DIGITAL_LEFT);
+			bool RIGHT_pressed = controller.get_digital(E_CONTROLLER_DIGITAL_RIGHT);
 
-		Lift::handleControllerInput(
-			controller.get_digital(E_CONTROLLER_DIGITAL_L2),
-			controller.get_digital(E_CONTROLLER_DIGITAL_L1)
-		);
+			if (LEFT_pressed && RIGHT_pressed) {
+				printf("LEFT and RIGHT were both pressed, transferring to PID tuning mode...\n\n---\n\n");
+				TuningCLI::tuningPID = true;
+				
+				continue;
+			}
 
-		if (controller.get_digital(E_CONTROLLER_DIGITAL_R1)) {
-			Scoring.move(127);
-		} else if (controller.get_digital(E_CONTROLLER_DIGITAL_R2)) {
-			Scoring.move(-127);
+			// Adjust lift targets.
+			if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_A)) {
+				Lift::setLiftTarget(Lift::A);
+			} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_B)) {
+				Lift::setLiftTarget(Lift::B);
+			} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_X)) {
+				Lift::setLiftTarget(Lift::C);
+			} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_Y)) {
+				Lift::setLiftTarget(Lift::D);
+			} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_UP)) {
+				Lift::setLiftTarget(Lift::E);
+			} else if (controller.get_digital_new_press(E_CONTROLLER_DIGITAL_DOWN)) {
+				Lift::setLiftTarget(Lift::F);
+			}
+
+			Lift::handleControllerInput(
+				controller.get_digital(E_CONTROLLER_DIGITAL_L2),
+				controller.get_digital(E_CONTROLLER_DIGITAL_L1)
+			);
+
+			if (controller.get_digital(E_CONTROLLER_DIGITAL_R1)) {
+				Scoring.move(127);
+			} else if (controller.get_digital(E_CONTROLLER_DIGITAL_R2)) {
+				Scoring.move(-127);
+			} else {
+				Scoring.move(-11);
+			}
+
+
+			// Drivetrain control.
+			int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+			int rightY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
+
+			chassis.tank(leftY, rightY);
 		} else {
-			Scoring.move(-11);
+			tuningCLI();
 		}
-
-
-		// Drivetrain control.
-		int leftY = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
-		int rightY = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_Y);
-
-		chassis.tank(leftY, rightY);
 
 		// delay to save resources
 		pros::delay(20);

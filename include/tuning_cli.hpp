@@ -8,6 +8,7 @@
  * - UP -> MOVEFWD (pid test auton - LATERAL)
  * - LEFT -> TURNLEFT (pid test auton - ANGULAR)
  * - X & A -> exit pid tuner
+ * - LEFT + RIGHT -> RE-enable pid tuner
  * 
  * ---
  * 

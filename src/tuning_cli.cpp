@@ -217,8 +217,10 @@ void btnListener(void* param) {
 					chassis.cancelAllMotions();
 				} else if ((commandBtn == CommandBtns::MOVEFWD) || (commandBtn == CommandBtns::TURNLEFT)) {
 					TuningCLI::state = TuningCLIState::TUNE;
-				} else {
+				} else if (commandBtn == CommandBtns::SET) {
 					TuningCLI::state = TuningCLIState::VAR;
+				} else {
+					TuningCLI::state = TuningCLIState::CMD;
 				}
 
 				std::cout << "setting state to: " << TuningCLIStateNames[(int)TuningCLI::state] << std::endl;

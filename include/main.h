@@ -38,6 +38,7 @@
 
 #include "Lift.hpp"
 
+#include "tuning_cli.hpp"
 #include "util.hpp"
 
 using namespace pros;
