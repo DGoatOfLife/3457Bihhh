@@ -32,10 +32,13 @@ OdomSensors sensors(
 	&imu		// IMU
 );
 
+// kP 10 kD 8
+// kP 11 kD 12
+// kP 12 kD 12
 ControllerSettings lateral_controller(
-	10,		// kP
+	12,		// kP
 	0,		// kI
-	3,		// kD
+	12,		// kD
 	3,		// anti windup
 	1,		// small error range (in)
 	100,	// small error range timeout (ms)

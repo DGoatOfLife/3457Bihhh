@@ -56,10 +56,8 @@ namespace TuningCLI {
     /**
      * CONFIG vars:
      */
-	// legacy: when we had the actual optical shaft encoders to adjust kP and kD :P
-    // const bool usingPhysicalPIDTuner = false;
-
-    const bool runningLinearPIDTest = false;
+	// Whether we are tuning linear or angular PID. MUST be hardcoded, cannot be changed while running the tuning program.
+    const bool runningLinearPIDTest = true;
 
     /**
      * RUNTIME vars:
@@ -386,7 +384,7 @@ void tuningCLI() {
 
 						switch (TuningCLI::command) {
 							case CommandBtns::MOVEFWD:
-								chassis.moveToPoint(0, -24, 3000, {}, false);
+								chassis.moveToPoint(0, 24, 3000, {}, false);
 								
 								TuningCLI::resetState();
 
